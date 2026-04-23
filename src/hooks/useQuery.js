@@ -71,40 +71,61 @@
 //           }
 //         );
 // };
-// //export default useFetchTotalClicks;
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 
-// ✅ Fetch user's shortened URLs
+
+import { useQuery } from "@tanstack/react-query";
+import api from "../api/api";
+
+// ✅ FETCH USER URLS
 export const useFetchMyShortUrls = (token, onError) => {
   return useQuery({
     queryKey: ["my-shortenurls"],
     queryFn: async () => {
-      const res = await axios.get("/api/url/myurls", {
+      const res = await api.get("/api/urls/myurls", {
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + token,
         },
       });
-      return res.data || [];
+      return res.data;
     },
-    enabled: !!token,
+    select: (data) => {
+      return data.sort(
+        (a, b) => new Date(b.createdDate) - new Date(a.createdDate)
+      );
+    },
     onError,
+    staleTime: 5000,
+    enabled: !!token, // ✅ important (avoid firing before token exists)
   });
 };
 
-// ✅ Fetch total clicks
+// ✅ FETCH TOTAL CLICKS (GRAPH DATA)
 export const useFetchTotalClicks = (token, onError) => {
   return useQuery({
     queryKey: ["url-totalclick"],
     queryFn: async () => {
-      const res = await axios.get("/api/urls/totalClicks?startDate=2024-04-01&endDate=2026-04-30", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return res.data || [];
+      const res = await api.get(
+        "/api/urls/totalClicks?startDate=2024-04-01&endDate=2026-04-30",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+      return res.data;
     },
-    enabled: !!token,
+    select: (data) => {
+      return Object.keys(data).map((key) => ({
+        clickDate: key,
+        count: data[key],
+      }));
+    },
     onError,
+    staleTime: 5000,
+    enabled: !!token,
   });
 };
