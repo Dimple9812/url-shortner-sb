@@ -21,5 +21,4 @@ REST APIs
 Database: MySQL / PostgreSQL (depending on your setup)
 
 Link: https://url-shortner-12.netlify.app/login 
-Frontend: Netlify
-Backend: Docker
+
